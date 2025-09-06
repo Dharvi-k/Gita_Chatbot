@@ -1,0 +1,9 @@
+streamlit
+transformers
+torch
+accelerate
+bitsandbytes
+sentence-transformers
+scikit-learn
+numpy
+nltk
