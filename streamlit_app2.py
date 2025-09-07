@@ -6,16 +6,13 @@ import requests
 # ==========================
 HF_API_KEY = st.secrets["HF_API_KEY"]  # Add in Streamlit -> Settings -> Secrets
 HEADERS = {"Authorization": f"Bearer {HF_API_KEY}"}
-
-# Free-tier friendly model
-MODEL = "gpt2"
+MODEL = "facebook/bart-large-cnn"  # Stable free model
 
 # ==========================
 # Query Hugging Face Model
 # ==========================
-def query_huggingface(prompt, max_tokens=200):
-    # Add ?wait_for_model=true so HF spins up the model instead of returning 404
-    url = f"https://api-inference.huggingface.co/models/{MODEL}?wait_for_model=true"
+def query_huggingface(prompt, max_tokens=300):
+    url = f"https://api-inference.huggingface.co/models/{MODEL}"
     payload = {"inputs": prompt, "parameters": {"max_new_tokens": max_tokens}}
 
     try:
@@ -25,33 +22,50 @@ def query_huggingface(prompt, max_tokens=200):
 
     if response.status_code != 200:
         try:
-            return f"⚠️ Error {response.status_code}: {response.json()}"
-        except Exception:
+            return f"⚠️ Error {response.status_code}: {response.json().get('error', response.text)}"
+        except ValueError:
             return f"⚠️ Error {response.status_code}: {response.text}"
 
     try:
         data = response.json()
     except ValueError:
-        return f"⚠️ Failed to parse JSON. Raw response: {response.text}"
+        return f"⚠️ Failed to parse JSON. Raw: {response.text}"
 
-    # Extract generated text
-    if isinstance(data, list) and data and "generated_text" in data[0]:
+    if isinstance(data, list) and data and "summary_text" in data[0]:
+        return data[0]["summary_text"]
+    elif isinstance(data, list) and "generated_text" in data[0]:
         return data[0]["generated_text"]
-    elif isinstance(data, dict) and "generated_text" in data:
-        return data["generated_text"]
+    return str(data)
+
+# ==========================
+# Task Detection Logic
+# ==========================
+def detect_task(query: str) -> str:
+    q = query.lower()
+    if "translate" in q:
+        return "translate"
+    elif "summarize" in q or "short" in q:
+        return "summarize"
+    elif "compare" in q:
+        return "compare"
     else:
-        return str(data)  # Fallback for debugging
+        return "explain"
 
 # ==========================
 # Chatbot Logic
 # ==========================
 def gita_chatbot(user_query):
-    prompt = f"""
-    You are a Bhagavad Gita expert.
-    The user asked: "{user_query}"
+    task = detect_task(user_query)
 
-    Answer with spiritual depth but in simple, everyday language.
-    """
+    if task == "summarize":
+        prompt = f"Summarize this Bhagavad Gita concept in simple words (around 150 words): {user_query}"
+    elif task == "translate":
+        prompt = f"Translate this Bhagavad Gita verse into plain English with meaning: {user_query}"
+    elif task == "compare":
+        prompt = f"Compare the Bhagavad Gita's view on {user_query} with modern life (200 words)."
+    else:  # explain (default)
+        prompt = f"Explain this Bhagavad Gita teaching in detail, in at least 200 words, with spiritual depth but simple everyday language: {user_query}"
+
     return query_huggingface(prompt)
 
 # ==========================
