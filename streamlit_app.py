@@ -8,7 +8,7 @@ HF_API_KEY = st.secrets["HF_API_KEY"]  # Add in Streamlit -> Settings -> Secrets
 HEADERS = {"Authorization": f"Bearer {HF_API_KEY}"}
 
 # Free-tier friendly model
-MODEL = "google/flan-t5-base"
+MODEL = "google/flan-t5-small"
 
 # ==========================
 # Query Hugging Face Model
@@ -73,3 +73,4 @@ if st.button("Ask"):
         st.success(answer)
     else:
         st.warning("Please enter a question.")
+
