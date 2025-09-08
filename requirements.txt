@@ -3,3 +3,6 @@ requests
 sentence-transformers
 scikit-learn
 numpy
+pandas
+faiss-cpu
+
