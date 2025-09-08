@@ -1,8 +1,18 @@
+# Core app
 streamlit
-requests
-sentence-transformers
-scikit-learn
-numpy
 pandas
+numpy
+scikit-learn
+
+# Embeddings & NLP
+sentence-transformers
+transformers
+nltk
+
+# Vector search
 faiss-cpu
 
+# Quantization support for Mistral
+accelerate
+bitsandbytes
+torch
