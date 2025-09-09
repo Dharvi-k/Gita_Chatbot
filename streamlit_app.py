@@ -8,7 +8,7 @@ HF_API_KEY = st.secrets["HF_API_KEY"]  # Add in Streamlit -> Settings -> Secrets
 HEADERS = {"Authorization": f"Bearer {HF_API_KEY}"}
 
 # Free-tier friendly model
-MODEL = "facebook/opt-1.3b"
+MODEL = "EleutherAI/gpt-neo-1.3B"
 
 # ==========================
 # Query Hugging Face Model
@@ -73,6 +73,7 @@ if st.button("Ask"):
         st.success(answer)
     else:
         st.warning("Please enter a question.")
+
 
 
 
